@@ -22,7 +22,7 @@ pipeline {
         stage('Run Login Test') {
             steps {
                 // Removed '|| true' so that the build will fail if the tests fail.
-                sh 'docker run --rm -v "${env.WORKSPACE}/screenshots:/app/screenshots" login-monitor-image'
+                sh "docker run --rm -v '${env.WORKSPACE}/screenshots:/app/screenshots' login-monitor-image"
             }
         }
     }
