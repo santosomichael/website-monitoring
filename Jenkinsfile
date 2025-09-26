@@ -24,20 +24,33 @@ pipeline {
         }
 
         stage('Run Login Test') {
+            // This post block will run after the steps in this stage,
+            // ensuring we copy files and clean up the container even if tests fail.
+            post {
+                always {
+                    steps {
+                        // Copy the screenshots from the finished container to the Jenkins workspace.
+                        // The || true prevents the build from failing if the folder doesn't exist.
+                        sh "docker cp login-test-container:/app/screenshots ./screenshots || true"
+                        // Clean up the container now that we have the files.
+                        sh "docker rm -f login-test-container"
+                    }
+                }
+            }
             steps {
                 withCredentials([
                     string(credentialsId: 'LOGIN_USERNAME', variable: 'LOGIN_USERNAME_ENV'),
                     string(credentialsId: 'LOGIN_PASSWORD', variable: 'LOGIN_PASSWORD_ENV')
                 ]) {
-                    sh "mkdir -p screenshots && chmod 777 screenshots"
+                    sh "mkdir -p screenshots"
                     
                     sh """
-                        docker run --rm \\
+                        docker run \\
+                            --name login-test-container \\
                             -e BASE_URL=${env.BASE_URL} \\
                             -e LOGIN_USERNAME=${LOGIN_USERNAME_ENV} \\
                             -e LOGIN_PASSWORD=${LOGIN_PASSWORD_ENV} \\
                             -e HEADLESS=${env.HEADLESS} \\
-                            -v "${env.WORKSPACE}/screenshots:/app/screenshots" \\
                             login-monitor-image
                     """
                 }
