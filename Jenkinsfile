@@ -1,15 +1,20 @@
-// File: Jenkinsfile
 pipeline {
     agent any
+    
+    // Define non-secret variables here
+    environment {
+        BASE_URL = "https://gatransnetworksejahtera.co.id"
+        HEADLESS = "true" // Use "true" for automated runs in Jenkins
+    }
+    
     triggers {
-        // Corrected: 'H * * * *' runs the job once per hour.
         cron('H * * * *')
     }
+    
     stages {
-        // Added back: This stage is essential to get your code.
         stage('Checkout Code') {
             steps {
-                git url: 'https://github.com/santosomichael/website-monitoring', branch: 'master'
+                git url: 'https://github.com/santosomichael/website-monitoring.git', branch: 'master'
             }
         }
 
@@ -21,20 +26,30 @@ pipeline {
 
         stage('Run Login Test') {
             steps {
-                // Removed '|| true' so that the build will fail if the tests fail.
-                sh "docker run --rm -v '${env.WORKSPACE}/screenshots:/app/screenshots' login-monitor-image"
+                // Securely load the credentials you stored in Jenkins
+                withCredentials([
+                    string(credentialsId: 'LOGIN_USERNAME', variable: 'LOGIN_USERNAME_ENV'),
+                    string(credentialsId: 'LOGIN_PASSWORD', variable: 'LOGIN_PASSWORD_ENV')
+                ]) {
+                    // CORRECTED: Pass the variables into the Docker container using the -e flag
+                    // The """ allows for a multi-line command for readability
+                    sh """
+                        docker run --rm \\
+                            -e BASE_URL=${env.BASE_URL} \\
+                            -e LOGIN_USERNAME=${LOGIN_USERNAME_ENV} \\
+                            -e LOGIN_PASSWORD=${LOGIN_PASSWORD_ENV} \\
+                            -e HEADLESS=${env.HEADLESS} \\
+                            -v "${env.WORKSPACE}/screenshots:/app/screenshots" \\
+                            login-monitor-image
+                    """
+                }
             }
         }
     }
     post {
         always {
-            // This saves your screenshots after every run.
             archiveArtifacts artifacts: 'screenshots/**/*.png', allowEmptyArchive: true
-            
-            // Added: Good practice to clean up the Docker image after the run.
             sh 'docker rmi login-monitor-image || true'
-            
-            // This cleans the workspace to save disk space.
             cleanWs()
         }
     }
