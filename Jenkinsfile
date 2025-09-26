@@ -27,9 +27,9 @@ pipeline {
             // This post block will run after the steps in this stage.
             post {
                 always {
-                    // CORRECTED: Steps go directly inside the 'always' condition.
-                    // The extra 'steps { ... }' block has been removed.
-                    sh "docker cp login-test-container:/app/screenshots ./screenshots || true"
+                    // CORRECTED: Added '/.' to copy the contents of the folder, not the folder itself.
+                    // This prevents the nested screenshots/screenshots directory.
+                    sh "docker cp login-test-container:/app/screenshots/. ./screenshots || true"
                     sh "docker rm -f login-test-container"
                 }
             }
