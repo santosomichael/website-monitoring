@@ -1,0 +1,11 @@
+Ignore Node.js dependencies folder
+node_modules
+
+Ignore local environment file - IMPORTANT for security
+.env
+
+Ignore screenshots folder
+screenshots/
+
+Ignore Python cache files
+__pycache__/
