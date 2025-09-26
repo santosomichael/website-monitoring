@@ -52,26 +52,41 @@ pipeline {
     }
     post {
         success {
-            withCredentials([
-                string(credentialsId: 'TELEGRAM_CHAT_ID', variable: 'CHAT_ID')
-            ]) {
-                // CORRECTED: The token is no longer needed here.
-                // The plugin will use the bot configured in "Manage Jenkins > System".
-                telegramSend(
-                    chatId: CHAT_ID,
-                    message: "✅ SUCCESS: Jenkins Job '${env.JOB_NAME}' - Build #${env.BUILD_NUMBER}\n\nBuild completed successfully.\n[View Build](${env.BUILD_URL})"
-                )
+            script {
+                try {
+                    withCredentials([
+                        string(credentialsId: 'TELEGRAM_CHAT_ID', variable: 'CHAT_ID')
+                    ]) {
+                        echo "Attempting to send success notification to Telegram..."
+                        telegramSend(
+                            chatId: CHAT_ID,
+                            message: "✅ SUCCESS: Jenkins Job '${env.JOB_NAME}' - Build #${env.BUILD_NUMBER}\n\nBuild completed successfully.\n[View Build](${env.BUILD_URL})"
+                        )
+                        echo "Telegram notification sent successfully."
+                    }
+                } catch (e) {
+                    echo "ERROR: Failed to send Telegram notification."
+                    echo e.toString()
+                }
             }
         }
         failure {
-            withCredentials([
-                string(credentialsId: 'TELEGRAM_CHAT_ID', variable: 'CHAT_ID')
-            ]) {
-                // CORRECTED: The token is no longer needed here.
-                telegramSend(
-                    chatId: CHAT_ID,
-                    message: "❌ FAILED: Jenkins Job '${env.JOB_NAME}' - Build #${env.BUILD_NUMBER}\n\nThe login test may have failed. Please check the console output immediately.\n[View Build](${env.BUILD_URL})"
-                )
+            script {
+                try {
+                    withCredentials([
+                        string(credentialsId: 'TELEGRAM_CHAT_ID', variable: 'CHAT_ID')
+                    ]) {
+                        echo "Attempting to send failure notification to Telegram..."
+                        telegramSend(
+                            chatId: CHAT_ID,
+                            message: "❌ FAILED: Jenkins Job '${env.JOB_NAME}' - Build #${env.BUILD_NUMBER}\n\nThe login test may have failed. Please check the console output immediately.\n[View Build](${env.BUILD_URL})"
+                        )
+                        echo "Telegram notification sent successfully."
+                    }
+                } catch (e) {
+                    echo "ERROR: Failed to send Telegram notification."
+                    echo e.toString()
+                }
             }
         }
         always {
