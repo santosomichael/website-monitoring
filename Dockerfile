@@ -7,6 +7,10 @@ COPY requirements.txt .
 # Install the Python dependencies
 RUN pip install -r requirements.txt
 
+# --- ADD THIS LINE ---
+# Explicitly install the chromium browser to ensure it matches the library version
+RUN playwright install chromium
+
 COPY . .
 # The command to run the Python script
 CMD ["python", "app.py"]
