@@ -55,9 +55,9 @@ pipeline {
             withCredentials([
                 string(credentialsId: 'TELEGRAM_CHAT_ID', variable: 'CHAT_ID')
             ]) {
-                // CORRECTED: Used 'tokenCredentialId' and removed 'parseMode'
+                // CORRECTED: The token is no longer needed here.
+                // The plugin will use the bot configured in "Manage Jenkins > System".
                 telegramSend(
-                    tokenCredentialId: 'TELEGRAM_BOT_TOKEN',
                     chatId: CHAT_ID,
                     message: "✅ SUCCESS: Jenkins Job '${env.JOB_NAME}' - Build #${env.BUILD_NUMBER}\n\nBuild completed successfully.\n[View Build](${env.BUILD_URL})"
                 )
@@ -67,9 +67,8 @@ pipeline {
             withCredentials([
                 string(credentialsId: 'TELEGRAM_CHAT_ID', variable: 'CHAT_ID')
             ]) {
-                // CORRECTED: Used 'tokenCredentialId' and removed 'parseMode'
+                // CORRECTED: The token is no longer needed here.
                 telegramSend(
-                    tokenCredentialId: 'TELEGRAM_BOT_TOKEN',
                     chatId: CHAT_ID,
                     message: "❌ FAILED: Jenkins Job '${env.JOB_NAME}' - Build #${env.BUILD_NUMBER}\n\nThe login test may have failed. Please check the console output immediately.\n[View Build](${env.BUILD_URL})"
                 )
