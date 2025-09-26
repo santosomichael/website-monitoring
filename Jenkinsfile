@@ -24,17 +24,13 @@ pipeline {
         }
 
         stage('Run Login Test') {
-            // This post block will run after the steps in this stage,
-            // ensuring we copy files and clean up the container even if tests fail.
+            // This post block will run after the steps in this stage.
             post {
                 always {
-                    steps {
-                        // Copy the screenshots from the finished container to the Jenkins workspace.
-                        // The || true prevents the build from failing if the folder doesn't exist.
-                        sh "docker cp login-test-container:/app/screenshots ./screenshots || true"
-                        // Clean up the container now that we have the files.
-                        sh "docker rm -f login-test-container"
-                    }
+                    // CORRECTED: Steps go directly inside the 'always' condition.
+                    // The extra 'steps { ... }' block has been removed.
+                    sh "docker cp login-test-container:/app/screenshots ./screenshots || true"
+                    sh "docker rm -f login-test-container"
                 }
             }
             steps {
