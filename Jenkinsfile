@@ -49,7 +49,7 @@ pipeline {
     post {
         always {
             // This will now find the screenshots successfully
-            archiveArtifacts artifacts: 'screenshots/**/*.png', allowEmptyArchive: true
+            archiveArtifacts artifacts: 'screenshots/*.png', allowEmptyArchive: true
             sh 'docker rmi login-monitor-image || true'
             cleanWs()
         }
