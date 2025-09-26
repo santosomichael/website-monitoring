@@ -29,11 +29,10 @@ pipeline {
                     string(credentialsId: 'LOGIN_USERNAME', variable: 'LOGIN_USERNAME_ENV'),
                     string(credentialsId: 'LOGIN_PASSWORD', variable: 'LOGIN_PASSWORD_ENV')
                 ]) {
-                    sh "mkdir -p screenshots"
+                    sh "mkdir -p screenshots && chmod 777 screenshots"
                     
                     sh """
                         docker run --rm \\
-                            --user \$(id -u):\$(id -g) \\
                             -e BASE_URL=${env.BASE_URL} \\
                             -e LOGIN_USERNAME=${LOGIN_USERNAME_ENV} \\
                             -e LOGIN_PASSWORD=${LOGIN_PASSWORD_ENV} \\
