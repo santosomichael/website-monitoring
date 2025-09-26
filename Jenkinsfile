@@ -33,7 +33,7 @@ pipeline {
                     
                     sh """
                         docker run --rm \\
-                            --user $(id -u):$(id -g) \\
+                            --user \$(id -u):\$(id -g) \\
                             -e BASE_URL=${env.BASE_URL} \\
                             -e LOGIN_USERNAME=${LOGIN_USERNAME_ENV} \\
                             -e LOGIN_PASSWORD=${LOGIN_PASSWORD_ENV} \\
@@ -47,7 +47,7 @@ pipeline {
     }
     post {
         always {
-            archiveArtifacts artifacts: 'screenshots/*.png', allowEmptyArchive: true
+            archiveArtifacts artifacts: 'screenshots/**/*.png', allowEmptyArchive: true
             sh 'docker rmi login-monitor-image || true'
             cleanWs()
         }
