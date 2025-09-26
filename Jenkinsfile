@@ -48,7 +48,7 @@ pipeline {
     }
     post {
         always {
-            archiveArtifacts artifacts: 'screenshots/**/*.png', allowEmptyArchive: true
+            archiveArtifacts artifacts: 'screenshots/*.png', allowEmptyArchive: true
             sh 'docker rmi login-monitor-image || true'
             cleanWs()
         }
