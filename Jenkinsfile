@@ -53,29 +53,25 @@ pipeline {
     post {
         success {
             withCredentials([
-                string(credentialsId: 'TELEGRAM_BOT_TOKEN', variable: 'BOT_TOKEN'),
                 string(credentialsId: 'TELEGRAM_CHAT_ID', variable: 'CHAT_ID')
             ]) {
-                // CORRECTED: Changed 'botToken' to 'token' and removed 'env.' prefix
+                // CORRECTED: Used 'tokenCredentialId' and removed 'parseMode'
                 telegramSend(
-                    token: BOT_TOKEN,
+                    tokenCredentialId: 'TELEGRAM_BOT_TOKEN',
                     chatId: CHAT_ID,
-                    message: "✅ *SUCCESS: Jenkins Job '${env.JOB_NAME}'* - Build #${env.BUILD_NUMBER}\n\nBuild completed successfully.\n[View Build](${env.BUILD_URL})",
-                    parseMode: 'Markdown'
+                    message: "✅ SUCCESS: Jenkins Job '${env.JOB_NAME}' - Build #${env.BUILD_NUMBER}\n\nBuild completed successfully.\n[View Build](${env.BUILD_URL})"
                 )
             }
         }
         failure {
             withCredentials([
-                string(credentialsId: 'TELEGRAM_BOT_TOKEN', variable: 'BOT_TOKEN'),
                 string(credentialsId: 'TELEGRAM_CHAT_ID', variable: 'CHAT_ID')
             ]) {
-                // CORRECTED: Changed 'botToken' to 'token' and removed 'env.' prefix
+                // CORRECTED: Used 'tokenCredentialId' and removed 'parseMode'
                 telegramSend(
-                    token: BOT_TOKEN,
+                    tokenCredentialId: 'TELEGRAM_BOT_TOKEN',
                     chatId: CHAT_ID,
-                    message: "❌ *FAILED: Jenkins Job '${env.JOB_NAME}'* - Build #${env.BUILD_NUMBER}\n\nThe login test may have failed. Please check the console output immediately.\n[View Build](${env.BUILD_URL})",
-                    parseMode: 'Markdown'
+                    message: "❌ FAILED: Jenkins Job '${env.JOB_NAME}' - Build #${env.BUILD_NUMBER}\n\nThe login test may have failed. Please check the console output immediately.\n[View Build](${env.BUILD_URL})"
                 )
             }
         }
