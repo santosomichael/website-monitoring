@@ -24,11 +24,8 @@ pipeline {
         }
 
         stage('Run Login Test') {
-            // This post block will run after the steps in this stage.
             post {
                 always {
-                    // CORRECTED: Added '/.' to copy the contents of the folder, not the folder itself.
-                    // This prevents the nested screenshots/screenshots directory.
                     sh "docker cp login-test-container:/app/screenshots/. ./screenshots || true"
                     sh "docker rm -f login-test-container"
                 }
@@ -53,7 +50,38 @@ pipeline {
             }
         }
     }
+    // This 'post' block runs after the entire pipeline is finished.
     post {
+        // This block runs only if the build is successful.
+        success {
+            // Load both the bot token and the chat ID from credentials
+            withCredentials([
+                string(credentialsId: 'TELEGRAM_BOT_TOKEN', variable: 'BOT_TOKEN'),
+                string(credentialsId: 'TELEGRAM_CHAT_ID', variable: 'CHAT_ID')
+            ]) {
+                telegramSend(
+                    botToken: env.BOT_TOKEN,
+                    chatId: env.CHAT_ID, // Use the variable from credentials
+                    message: "✅ *SUCCESS: Jenkins Job '${env.JOB_NAME}'* - Build #${env.BUILD_NUMBER}\n\nBuild completed successfully.\n[View Build](${env.BUILD_URL})",
+                    parseMode: 'Markdown'
+                )
+            }
+        }
+        // This block runs only if the build fails.
+        failure {
+            withCredentials([
+                string(credentialsId: 'TELEGRAM_BOT_TOKEN', variable: 'BOT_TOKEN'),
+                string(credentialsId: 'TELEGRAM_CHAT_ID', variable: 'CHAT_ID')
+            ]) {
+                telegramSend(
+                    botToken: env.BOT_TOKEN,
+                    chatId: env.CHAT_ID, // Use the variable from credentials
+                    message: "❌ *FAILED: Jenkins Job '${env.JOB_NAME}'* - Build #${env.BUILD_NUMBER}\n\nThe login test may have failed. Please check the console output immediately.\n[View Build](${env.BUILD_URL})",
+                    parseMode: 'Markdown'
+                )
+            }
+        }
+        // This 'always' block still runs to perform cleanup.
         always {
             archiveArtifacts artifacts: 'screenshots/*.png', allowEmptyArchive: true
             sh 'docker rmi login-monitor-image || true'
