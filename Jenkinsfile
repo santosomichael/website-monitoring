@@ -7,7 +7,7 @@ pipeline {
     }
     
     triggers {
-        cron('H * * * *')
+        cron('H/15 * * * *')
     }
     
     stages {
@@ -31,6 +31,7 @@ pipeline {
                 }
             }
             steps {
+                // Load all secrets: login credentials AND Telegram credentials
                 withCredentials([
                     string(credentialsId: 'LOGIN_USERNAME', variable: 'LOGIN_USERNAME_ENV'),
                     string(credentialsId: 'LOGIN_PASSWORD', variable: 'LOGIN_PASSWORD_ENV'),
@@ -54,6 +55,7 @@ pipeline {
             }
         }
     }
+    // The final post block now only handles cleanup.
     post {
         always {
             archiveArtifacts artifacts: 'screenshots/*.png', allowEmptyArchive: true
