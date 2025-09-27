@@ -12,6 +12,8 @@ CONFIG = {
     'username': os.getenv('LOGIN_USERNAME'),
     'password': os.getenv('LOGIN_PASSWORD'),
     'headless': os.getenv('HEADLESS', 'true').lower() == 'true',
+    'telegram_chat_id': os.getenv('TELEGRAM_CHAT_ID'),
+    'telegram_bot_token': os.getenv('TELEGRAM_BOT_TOKEN'),
     'screenshots_dir': './screenshots'
 }
 # -------------------------

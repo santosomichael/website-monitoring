@@ -6,6 +6,7 @@ from playwright.sync_api import sync_playwright
 # Import the configuration and individual test functions
 from config import CONFIG, validate_config
 from tests.login import check_login_and_dashboard
+from telegram_sender import send_telegram_message
 
 def run_all_checks(playwright):
     """
@@ -44,9 +45,14 @@ def run_all_checks(playwright):
         # If all tests pass, take a final success screenshot of the last page
         page.screenshot(path=global_var['get_path']('SUCCESS'), full_page=True)
         global_var['step'] += 1
+        signal_message = f"✅ All health checks passed successfully at {datetime.now().isoformat()}!"
+        send_telegram_message(signal_message)
+        
         print(f"\n✅ All checks passed successfully!")
 
     except Exception as e:
+        signal_message = f"❌ ERROR: A test failed during the health check at {datetime.now().isoformat()}! Check the logs and screenshots."
+        send_telegram_message(signal_message)
         print(f"\n❌ ERROR: A test failed during the health check!")
         print(e)
         page.screenshot(path=global_var['get_path']('ERROR'), full_page=True)
