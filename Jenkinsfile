@@ -33,7 +33,9 @@ pipeline {
             steps {
                 withCredentials([
                     string(credentialsId: 'LOGIN_USERNAME', variable: 'LOGIN_USERNAME_ENV'),
-                    string(credentialsId: 'LOGIN_PASSWORD', variable: 'LOGIN_PASSWORD_ENV')
+                    string(credentialsId: 'LOGIN_PASSWORD', variable: 'LOGIN_PASSWORD_ENV'),
+                    string(credentialsId: 'TELEGRAM_BOT_TOKEN', variable: 'TELEGRAM_BOT_TOKEN_ENV'),
+                    string(credentialsId: 'TELEGRAM_CHAT_ID', variable: 'TELEGRAM_CHAT_ID_ENV')
                 ]) {
                     sh "mkdir -p screenshots"
                     
@@ -44,6 +46,8 @@ pipeline {
                             -e LOGIN_USERNAME=${LOGIN_USERNAME_ENV} \\
                             -e LOGIN_PASSWORD=${LOGIN_PASSWORD_ENV} \\
                             -e HEADLESS=${env.HEADLESS} \\
+                            -e TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN_ENV} \\
+                            -e TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID_ENV} \\
                             login-monitor-image
                     """
                 }
@@ -51,44 +55,6 @@ pipeline {
         }
     }
     post {
-        success {
-            script {
-                try {
-                    withCredentials([
-                        string(credentialsId: 'TELEGRAM_CHAT_ID', variable: 'CHAT_ID')
-                    ]) {
-                        echo "Attempting to send success notification to Telegram..."
-                        telegramSend(
-                            chatId: CHAT_ID,
-                            message: "✅ SUCCESS: Jenkins Job '${env.JOB_NAME}' - Build #${env.BUILD_NUMBER}\n\nBuild completed successfully.\n[View Build](${env.BUILD_URL})"
-                        )
-                        echo "Telegram notification sent successfully."
-                    }
-                } catch (e) {
-                    echo "ERROR: Failed to send Telegram notification."
-                    echo e.toString()
-                }
-            }
-        }
-        failure {
-            script {
-                try {
-                    withCredentials([
-                        string(credentialsId: 'TELEGRAM_CHAT_ID', variable: 'CHAT_ID')
-                    ]) {
-                        echo "Attempting to send failure notification to Telegram..."
-                        telegramSend(
-                            chatId: CHAT_ID,
-                            message: "❌ FAILED: Jenkins Job '${env.JOB_NAME}' - Build #${env.BUILD_NUMBER}\n\nThe login test may have failed. Please check the console output immediately.\n[View Build](${env.BUILD_URL})"
-                        )
-                        echo "Telegram notification sent successfully."
-                    }
-                } catch (e) {
-                    echo "ERROR: Failed to send Telegram notification."
-                    echo e.toString()
-                }
-            }
-        }
         always {
             archiveArtifacts artifacts: 'screenshots/*.png', allowEmptyArchive: true
             sh 'docker rmi login-monitor-image || true'
